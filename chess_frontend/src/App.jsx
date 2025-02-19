@@ -1,8 +1,13 @@
+import ChessGame from '../src/pages/ChessGame/ChessGame.jsx'
+
 
 function App() {
 
   return (
-    <h1 style={{ fontSize: "6.9rem" }}>Lets Chess!</h1>
+    <>
+      <h1>Lets Chess!</h1>
+      <ChessGame />
+    </>
   )
 }
 
