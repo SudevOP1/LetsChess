@@ -1,13 +1,10 @@
 from bs4 import BeautifulSoup
 import requests, os, sys
 
-
 sys.stdout.reconfigure(encoding='utf-8') # for emojis
 
+# make changes here 👇
 location = "all assets\images"
-os.makedirs(location, exist_ok=True) # create dir if it does not exist
-
-
 piece_links = [ 
     "https://images.chesscomfiles.com/chess-themes/pieces/ocean/150/wp.png", # white pawn
     "https://images.chesscomfiles.com/chess-themes/pieces/ocean/150/wn.png", # white knight
@@ -24,6 +21,9 @@ piece_links = [
     "https://images.chesscomfiles.com/chess-themes/pieces/ocean/150/bk.png", # black king
 ]
 
+
+os.makedirs(location, exist_ok=True) # create dir if it does not exist
+
 def download_image(url, filename):
     response = requests.get(url, stream=True)
     if response.status_code == 200:
@@ -35,6 +35,6 @@ def download_image(url, filename):
         print(f"❌ Failed {filename}")
 
 
-for link in piece_links:
-    filename = os.path.join(location, link.split("/")[-1])
-    download_image(link, filename)
+for url in piece_links:
+    filename = os.path.join(location, url.split("/")[-1])
+    download_image(url, filename)

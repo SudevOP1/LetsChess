@@ -18,14 +18,26 @@ import { useState } from "react"
 
 const ChessGame = () => {
 
-  let pieces = {
-    // white pieces
-    wp: wpImage, wn: wnImage, wr: wrImage, wb: wbImage, wq: wqImage, wk: wkImage,
-    // black pieces
-    bp: bpImage, bn: bnImage, bb: bbImage, br: brImage, bq: bqImage, bk: bkImage,
-  }
-
-  let [boardState, setBoardState] = useState([
+    
+  let initialBoardDesign = [
+    /*
+        NOMENCLATURE I USED:
+        piece consists of two letters: color + pieceNotation
+        color:
+            b = black
+            w = white
+        pieceNotation:
+            k = king   (raja)
+            q = queen  (rani)
+            r = rook   (hathi)
+            n = knight (ghoda)
+            b = bishop (oont)
+            p = pawn   (pyada)
+        for eg:
+            "bp" = black pawn
+            "wn" = white knight
+            "  " = empty cell
+    */
     ["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
     ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
     ["  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "],
@@ -34,32 +46,38 @@ const ChessGame = () => {
     ["  ", "  ", "  ", "  ", "  ", "  ", "  ", "  "],
     ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
     ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"],
-  ])
+  ]
+  let pieceImages = {
+    "wp": wpImage, "wn": wnImage, "wr": wrImage, "wb": wbImage, "wq": wqImage, "wk": wkImage, // white pieces
+    "bp": bpImage, "bn": bnImage, "bb": bbImage, "br": brImage, "bq": bqImage, "bk": bkImage, // black pieces
+  }
+  // https://www.chess.com/game/live/106129187351
+  let demoMoves;
 
-  let [heldPiece, setHeldPiece] = useState(null)
+  let [boardState, setBoardState] = useState(initialBoardDesign);
+  let [heldPiece, setHeldPiece] = useState(null);
+  let [moves, setMoves] = useState([]);
 
-  let holdThisPiece = (rowIndex, colIndex, piece) => {
+  let holdThisPiece = (rankIndex, fileIndex, piece) => {
     if(piece != "  ") {
         setHeldPiece({
             "piece": piece,
-            "heldFromRowIndex": rowIndex,
-            "heldFromColIndex": colIndex,
+            "heldFromRankIndex": rankIndex,
+            "heldFromFileIndex": fileIndex,
         })
     }
   }
-
   let allowDrop = (e) => {
     e.preventDefault();
   }
-
-  let dropThisPiece = (rowIndex, colIndex) => {
+  let dropThisPiece = (rankIndex, fileIndex) => {
     if(heldPiece) {
         // copy existing board state
-        let newBoardState = boardState.map(row => [...row]) // deep copy
+        let newBoardState = boardState.map(rank => [...rank]) // deep copy
 
         // move the piece and clear previous cell
-        newBoardState[heldPiece.heldFromRowIndex][heldPiece.heldFromColIndex] = "  ";
-        newBoardState[rowIndex][colIndex] = heldPiece.piece
+        newBoardState[heldPiece.heldFromRankIndex][heldPiece.heldFromFileIndex] = "  ";
+        newBoardState[rankIndex][fileIndex] = heldPiece.piece
 
         // save this state
         setBoardState(newBoardState)
@@ -68,26 +86,26 @@ const ChessGame = () => {
   }
 
   return (
-  <div>
+  <div className="chess-game" >
 
     
     <div className="chess-board">
-        {boardState.map((row, rowIndex) => (
-            <div className="chess-board-row" key={rowIndex}>
-                {row.map((cell, colIndex) => {
-                    let isDarkCell = (rowIndex+colIndex) % 2 === 1;
+        {boardState.map((rank, rankIndex) => (
+            <div className="chess-board-rank" key={rankIndex}>
+                {rank.map((cell, fileIndex) => {
+                    let isDarkCell = (rankIndex+fileIndex) % 2 === 1;
                     return (
                         <div
-                            key={colIndex}
+                            key={fileIndex}
                             className={`chess-board-cell ${isDarkCell ?"dark-cell" :"bright-cell"}`}
                             onDragOver={allowDrop}
-                            onDrop={() => dropThisPiece(rowIndex, colIndex)}
+                            onDrop={() => dropThisPiece(rankIndex, fileIndex)}
                         >
                             {cell !== "  " && <img
                                 className="chess-board-piece"
-                                src={pieces[cell]}
+                                src={pieceImages[cell]}
                                 draggable
-                                onDragStart={() => holdThisPiece(rowIndex, colIndex, cell)}
+                                onDragStart={() => holdThisPiece(rankIndex, fileIndex, cell)}
                             />}
                         </div>
                     )
@@ -95,6 +113,9 @@ const ChessGame = () => {
             </div>
         ))}
 
+    </div>
+
+    <div className="moves-container">
     </div>
 
   </div>

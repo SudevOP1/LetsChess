@@ -1,11 +1,21 @@
+.chess-game {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    border: 1px solid red;
+}
+
 .chess-board {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    width: fit-content;
+    height: fit-content;
 }
 
-.chess-board-row {
+.chess-board-rank {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,3 +38,9 @@
     height: 100%;
 }
 
+
+.moves-container {
+    width: 100px;
+    height: 100px;
+    background: yellow;
+}
