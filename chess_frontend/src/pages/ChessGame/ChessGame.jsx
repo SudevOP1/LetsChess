@@ -171,6 +171,70 @@ const ChessGame = () => {
 
     return notation;
   }
+  let isValidMove = (toRankIndex, toFileIndex, heldPiece, boardState, newBoardState) => {
+    let piece         = heldPiece.piece.charAt(1);
+    let color         = heldPiece.piece.charAt(0);
+    let fromFile      = String.fromCharCode(97 + heldPiece.heldFromFileIndex); // Convert 0-7 to "a-h"
+    let fromRank      = (8 - parseInt(heldPiece.heldFromRankIndex)).toString();
+    let toFile        = String.fromCharCode(97 + toFileIndex); // Convert 0-7 to "a-h"
+    let toRank        = (8 - toRankIndex).toString();
+    let fromFileIndex = heldPiece.heldFromFileIndex;
+    let fromRankIndex = heldPiece.heldFromRankIndex;
+
+    if(toRankIndex < 0 || toRankIndex > 7 || toFileIndex < 0 || toFileIndex > 7) {
+      return false;
+    }
+
+    // white pawn moves
+    if(piece === "p" && color === "w") {
+      if(
+        // normal move
+        ( 
+          toRankIndex === fromRankIndex-1 &&
+          toFileIndex === fromFileIndex &&
+          boardState[toRankIndex][toFileIndex] === "  "
+        ) ||
+        (fromRankIndex === 6 && toRankIndex === 4)
+      ) return true;
+      else if(
+        // capture move
+        (
+          (toRankIndex+1 === fromRankIndex && toFileIndex+1 === fromFileIndex) ||
+          (toRankIndex+1 === fromRankIndex && toFileIndex-1 === fromFileIndex)
+        ) &&
+        (boardState[toRankIndex][toFileIndex] !== "  ") &&
+        (boardState[toRankIndex][toFileIndex].charAt(0) !== color)
+      ) return true;
+    }
+
+    // black pawn moves
+    else if(piece === "p" && color === "b") {
+      if(
+        // normal move
+        ( 
+          toRankIndex === fromRankIndex+1 &&
+          toFileIndex === fromFileIndex &&
+          boardState[toRankIndex][toFileIndex] === "  "
+        ) ||
+        (fromRankIndex === 1 && toRankIndex === 3)
+      ) return true;
+      else if(
+        // capture move
+        (
+          (toRankIndex-1 === fromRankIndex && toFileIndex+1 === fromFileIndex) ||
+          (toRankIndex-1 === fromRankIndex && toFileIndex-1 === fromFileIndex)
+        ) &&
+        (boardState[toRankIndex][toFileIndex] !== "  ") &&
+        (boardState[toRankIndex][toFileIndex].charAt(0) !== color)
+      ) return true;
+    }
+
+    // white bishop (oont)
+    else if(piece === "b" && color === "w") {
+
+    }
+    return false;
+  }
 
 
   let holdThisPiece = (rankIndex, fileIndex, piece) => {
@@ -191,35 +255,37 @@ const ChessGame = () => {
       // copy existing board state
       let newBoardState = boardState.map(rank => [...rank]) // deep copy
 
-      // move the piece and clear previous cell
-      newBoardState[heldPiece.heldFromRankIndex][heldPiece.heldFromFileIndex] = "  ";
-      newBoardState[rankIndex][fileIndex] = heldPiece.piece
+      // if valid move, move the piece and clear previous cell
+      if(isValidMove(rankIndex, fileIndex, heldPiece, boardState, newBoardState,)) {
+        newBoardState[heldPiece.heldFromRankIndex][heldPiece.heldFromFileIndex] = "  ";
+        newBoardState[rankIndex][fileIndex] = heldPiece.piece
 
-      // calculate and set move notation
-      /*
-        TODO: Add logic for following:
-        shortCastle
-        longCastle
-        enPassant
-      */
-      let promotionTo = "";
-      let shortCastle = false;
-      let longCastle  = false;
-      let enPassant   = false;
-      let notation = calcNotation(
-        rankIndex, fileIndex, heldPiece, boardState, newBoardState,
-        promotionTo, shortCastle, longCastle, enPassant
-      );
-      if(notation !== "") {
-        // console.log(notation);
-        let newMoves = [...moves]
-        newMoves.push(notation)
-        setMoves(newMoves);
+        // calculate and set move notation
+        /*
+          TODO: Add logic for following:
+          shortCastle
+          longCastle
+          enPassant
+        */
+        let promotionTo = "";
+        let shortCastle = false;
+        let longCastle  = false;
+        let enPassant   = false;
+        let notation = calcNotation(
+          rankIndex, fileIndex, heldPiece, boardState, newBoardState,
+          promotionTo, shortCastle, longCastle, enPassant
+        );
+        if(notation !== "") {
+          // console.log(notation);
+          let newMoves = [...moves]
+          newMoves.push(notation)
+          setMoves(newMoves);
+        }
+
+        // save this state
+        setBoardState(newBoardState)
+        setHeldPiece(null)
       }
-
-      // save this state
-      setBoardState(newBoardState)
-      setHeldPiece(null)
     }
   }
 
