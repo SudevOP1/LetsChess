@@ -15,8 +15,9 @@
 - [ ] Involved in **castling** with the king  
 
 ### ♘ Knight Moves:  
-- [ ] Moves in an **L-shape**: two squares in one direction, then one square perpendicular  
-- [ ] Can **jump over pieces**
+- [x] Moves in an **L-shape**: two squares in one direction, then one square perpendicular  
+- [x] Can **jump over pieces**
+- [ ] **Special case** for notation if two knights can move to same square
 
 ### ♗ Bishop Moves:  
 - [ ] Moves **diagonally** any number of squares  
