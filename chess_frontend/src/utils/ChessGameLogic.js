@@ -80,6 +80,62 @@ export function calcNotation (
     return notation;
 };
 
+function getAvailableRookSquares(boardState, fromFileIndex, fromRankIndex, color) {
+    let availableSquares = [];
+    // find available squares above
+    for(let i=fromRankIndex-1; i>=0; i--) {
+        if(boardState[i][fromFileIndex] === "  ") {
+            availableSquares.push({ rankIndex: i, fileIndex: fromFileIndex})
+        }
+        else if(boardState[i][fromFileIndex].charAt(0) !== color) {
+            availableSquares.push({ rankIndex: i, fileIndex: fromFileIndex})
+            break;
+        }
+        else {
+            break;
+        }
+    }
+    // find available squares below
+    for(let i=fromRankIndex+1; i<8; i++) {
+        if(boardState[i][fromFileIndex] === "  ") {
+            availableSquares.push({ rankIndex: i, fileIndex: fromFileIndex});
+        }
+        else if(boardState[i][fromFileIndex].charAt(0) !== color) {
+            availableSquares.push({ rankIndex: i, fileIndex: fromFileIndex});
+            break;
+        }
+        else {
+            break;
+        }
+    }
+    // find available squares to the right
+    for(let i=fromFileIndex+1; i<8; i++) {
+        if(boardState[fromRankIndex][i] === "  ") {
+            availableSquares.push({ rankIndex: fromRankIndex, fileIndex: i});
+        }
+        else if(boardState[fromRankIndex][i].charAt(0) !== color) {
+            availableSquares.push({ rankIndex: fromRankIndex, fileIndex: i});
+            break;
+        }
+        else {
+            break;
+        }
+    }
+    // find available squares to the left
+    for(let i=fromFileIndex-1; i>=0; i--) {
+        if(boardState[fromRankIndex][i] === "  ") {
+            availableSquares.push({ rankIndex: fromRankIndex, fileIndex: i});
+        }
+        else if(boardState[fromRankIndex][i].charAt(0) !== color) {
+            availableSquares.push({ rankIndex: fromRankIndex, fileIndex: i});
+            break;
+        }
+        else {
+            break;
+        }
+    }
+    return availableSquares;
+}
 
 export function isValidMove (toRankIndex, toFileIndex, heldPiece, boardState, newBoardState) {
     let notation = "";
@@ -205,6 +261,20 @@ export function isValidMove (toRankIndex, toFileIndex, heldPiece, boardState, ne
     // white rook moves (wr)
     // black rook moves (br)
     else if(piece === "r") {
+        let availableSquares = getAvailableRookSquares(boardState, fromFileIndex, fromRankIndex, color);
+        for(let square of availableSquares) {
+            if(square.rankIndex === toRankIndex && square.fileIndex === toFileIndex) {
+                notation += "R";
+                // capture move
+                if(boardState[toRankIndex][toFileIndex] !== "  ") {
+                    notation += "x";
+                }
+                notation += toFile;
+                notation += toRank;
+                isValid = true;
+                break;
+            }
+        }
     }
 
     // white queen moves (wq)

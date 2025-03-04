@@ -6,17 +6,18 @@
 - [x] Move forward **2 spaces** (only on first move)
 - [x] **Capture diagonally**
 - [ ] **Promotion** (queen, rook, bishop, or knight)
-- [ ] **Notation**
+- [x] **Notation**
 
 ### ♘ Knight Moves:
 - [x] **L-shape**
 - [x] **Can jump over pieces**
-- [ ] **Notation**
+- [x] **Notation**
 
 ### ♖ Rook Moves:
-- [ ] Moves **vertically**
-- [ ] Moves **horizontally**
-- [ ] Cannot jump over pieces
+- [x] Moves **vertically**
+- [x] Moves **horizontally**
+- [x] Cannot jump over pieces
+- [x] **Notation**
 
 ### ♗ Bishop Moves:
 - [ ] Moves **diagonally**
