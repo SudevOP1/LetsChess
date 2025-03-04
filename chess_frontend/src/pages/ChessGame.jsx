@@ -217,7 +217,8 @@ const ChessGame = () => {
     boardState,
     newBoardState
   ) => {
-    let notation = "";        
+    let notation = "";
+    let isValid = false;
     let piece = heldPiece.piece.charAt(1);
     let color = heldPiece.piece.charAt(0);
     let fromFile = String.fromCharCode(97 + heldPiece.heldFromFileIndex); // Convert 0-7 to "a-h"
@@ -237,27 +238,29 @@ const ChessGame = () => {
       return false;
     }
 
-    // white pawn moves
+    // white pawn moves (wp)
     if (piece === "p" && color === "w") {
 
       // normal move
       if (
-        (toRankIndex === fromRankIndex - 1 &&
-          toFileIndex === fromFileIndex &&
-          boardState[toRankIndex][toFileIndex] === "  ") ||
-        (fromRankIndex === 6 && toRankIndex === 4)
+        (
+          (toRankIndex === fromRankIndex - 1) ||     // single space
+          (fromRankIndex === 6 && toRankIndex === 4) // double space
+        ) &&
+        toFileIndex === fromFileIndex &&
+        boardState[toRankIndex][toFileIndex] === "  "
       ) {
         notation += toFile;
         notation += toRank;
-        return true;
+        isValid = true;
       }
 
       // capture move
       else if (
-        ((toRankIndex + 1 === fromRankIndex &&
-          toFileIndex + 1 === fromFileIndex) ||
-          (toRankIndex + 1 === fromRankIndex &&
-            toFileIndex - 1 === fromFileIndex)) &&
+        (
+          (toRankIndex + 1 === fromRankIndex && toFileIndex + 1 === fromFileIndex) ||
+          (toRankIndex + 1 === fromRankIndex && toFileIndex - 1 === fromFileIndex)
+        ) &&
         boardState[toRankIndex][toFileIndex] !== "  " &&
         boardState[toRankIndex][toFileIndex].charAt(0) !== color
       ) {
@@ -265,31 +268,33 @@ const ChessGame = () => {
         notation += "x";
         notation += toFile;
         notation += toRank;
-        return true;
+        isValid = true;
       }
     }
 
-    // black pawn moves
+    // black pawn moves (bp)
     else if (piece === "p" && color === "b") {
 
       // normal move
       if (
-        (toRankIndex === fromRankIndex + 1 &&
-          toFileIndex === fromFileIndex &&
-          boardState[toRankIndex][toFileIndex] === "  ") ||
-        (fromRankIndex === 1 && toRankIndex === 3)
+        (
+          (toRankIndex === fromRankIndex + 1) ||     // single space
+          (fromRankIndex === 1 && toRankIndex === 3) // double space
+        ) &&
+        toFileIndex === fromFileIndex &&
+        boardState[toRankIndex][toFileIndex] === "  "
       ) {
         notation += toFile;
         notation += toRank;
-        return true;
+        isValid = true;
       }
 
       // capture move
       else if (
-        ((toRankIndex - 1 === fromRankIndex &&
-          toFileIndex + 1 === fromFileIndex) ||
-          (toRankIndex - 1 === fromRankIndex &&
-            toFileIndex - 1 === fromFileIndex)) &&
+        (
+          (toRankIndex - 1 === fromRankIndex && toFileIndex + 1 === fromFileIndex) ||
+          (toRankIndex - 1 === fromRankIndex && toFileIndex - 1 === fromFileIndex)
+        ) &&
         boardState[toRankIndex][toFileIndex] !== "  " &&
         boardState[toRankIndex][toFileIndex].charAt(0) !== color
       ) {
@@ -297,14 +302,77 @@ const ChessGame = () => {
         notation += "x";
         notation += toFile;
         notation += toRank;
-        return true;
+        isValid = true;
       }
     }
 
-    // white knight (ghoda)
-    else if (piece === "b" && color === "w") {
-    }
-    return false;
+    // white knight moves (wn) (ghoda)
+    // black knight moves (bn) (ghoda)
+    // else if (piece === "n") {
+    //   if(boardState[toRankIndex][toFileIndex].charAt(0) !== color && (
+    //     (toFileIndex === fromFileIndex + 2 && toRankIndex === fromRankIndex - 1) ||
+    //     (toFileIndex === fromFileIndex + 2 && toRankIndex === fromRankIndex + 1) ||
+    //     (toFileIndex === fromFileIndex - 2 && toRankIndex === fromRankIndex - 1) ||
+    //     (toFileIndex === fromFileIndex - 2 && toRankIndex === fromRankIndex + 1) ||
+    //     (toFileIndex === fromFileIndex + 1 && toRankIndex === fromRankIndex - 2) ||
+    //     (toFileIndex === fromFileIndex + 1 && toRankIndex === fromRankIndex + 2) ||
+    //     (toFileIndex === fromFileIndex - 1 && toRankIndex === fromRankIndex - 2) ||
+    //     (toFileIndex === fromFileIndex - 1 && toRankIndex === fromRankIndex + 2))
+    //   ) {
+    //     notation += "N";
+
+    //     let ambiguousKnights = [];
+    //     for(let r=0; r<8; r++) {
+    //       for(let f=0; f<8; f++) {
+    //         if(
+    //           boardState[r][f] === piece + color && // same color knight
+    //           !(r === fromRankIndex && f === fromFileIndex) // not the current knight
+    //         ) {
+    //           // check if this knight can also move to (toRankIndex, toFileIndex)
+    //           if (
+    //             (f+2 === toFileIndex && r-1 === toRankIndex) ||
+    //             (f+2 === toFileIndex && r+1 === toRankIndex) ||
+    //             (f-2 === toFileIndex && r-1 === toRankIndex) ||
+    //             (f-2 === toFileIndex && r+1 === toRankIndex) ||
+    //             (f+1 === toFileIndex && r-2 === toRankIndex) ||
+    //             (f+1 === toFileIndex && r+2 === toRankIndex) ||
+    //             (f-1 === toFileIndex && r-2 === toRankIndex) ||
+    //             (f-1 === toFileIndex && r+2 === toRankIndex)
+    //           ) {
+    //             ambiguousKnights.push({ file: f, rank: r });
+    //           }
+    //         }
+    //       }
+    //     }
+    //     // Handle notation for ambiguity
+    //     if (ambiguousKnights.length > 0) {
+    //       let sameFile = ambiguousKnights.some(knight => knight.file === fromFileIndex);
+    //       let sameRank = ambiguousKnights.some(knight => knight.rank === fromRankIndex);
+
+    //       if (!sameFile) {
+    //         // If knights are on different files, include the file (column)
+    //         notation += String.fromCharCode(97 + fromFileIndex); // Convert to 'a'-'h'
+    //       } else if (!sameRank) {
+    //         // If knights are on the same file but different ranks, include the rank
+    //         notation += (8 - fromRankIndex).toString(); // Convert to '1'-'8'
+    //       } else {
+    //         // If knights share the same file and rank (highly unlikely but possible in bug scenarios), include both
+    //         notation += String.fromCharCode(97 + fromFileIndex) + (8 - fromRankIndex);
+    //       }
+    //     }
+
+    //     if(boardState[toRankIndex][toFileIndex] !== "  ") {
+    //       notation += "x"; // capture move
+    //     }
+    //     notation += toFile;
+    //     notation += toRank;
+    //     isValid = true;
+    //   }
+    // }
+
+    
+    notation === "" ? null : console.log(notation);
+    return isValid;
   };
 
   let holdThisPiece = (rankIndex, fileIndex, piece) => {

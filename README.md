@@ -16,8 +16,7 @@
 
 ### ♘ Knight Moves:  
 - [ ] Moves in an **L-shape**: two squares in one direction, then one square perpendicular  
-- [ ] Can **jump over pieces**  
-- [ ] The only piece that can move when the board is completely blocked  
+- [ ] Can **jump over pieces**
 
 ### ♗ Bishop Moves:  
 - [ ] Moves **diagonally** any number of squares  
