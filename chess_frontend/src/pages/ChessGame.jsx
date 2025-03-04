@@ -217,6 +217,7 @@ const ChessGame = () => {
     boardState,
     newBoardState
   ) => {
+    let notation = "";        
     let piece = heldPiece.piece.charAt(1);
     let color = heldPiece.piece.charAt(0);
     let fromFile = String.fromCharCode(97 + heldPiece.heldFromFileIndex); // Convert 0-7 to "a-h"
@@ -230,56 +231,77 @@ const ChessGame = () => {
       toRankIndex < 0 ||
       toRankIndex > 7 ||
       toFileIndex < 0 ||
-      toFileIndex > 7
+      toFileIndex > 7 ||
+      (toFile === fromFile && parseInt(toRank) === parseInt(fromRank))
     ) {
       return false;
     }
 
     // white pawn moves
     if (piece === "p" && color === "w") {
+
+      // normal move
       if (
-        // normal move
         (toRankIndex === fromRankIndex - 1 &&
           toFileIndex === fromFileIndex &&
           boardState[toRankIndex][toFileIndex] === "  ") ||
         (fromRankIndex === 6 && toRankIndex === 4)
-      )
+      ) {
+        notation += toFile;
+        notation += toRank;
         return true;
+      }
+
+      // capture move
       else if (
-        // capture move
         ((toRankIndex + 1 === fromRankIndex &&
           toFileIndex + 1 === fromFileIndex) ||
           (toRankIndex + 1 === fromRankIndex &&
             toFileIndex - 1 === fromFileIndex)) &&
         boardState[toRankIndex][toFileIndex] !== "  " &&
         boardState[toRankIndex][toFileIndex].charAt(0) !== color
-      )
+      ) {
+        notation += fromFile;
+        notation += "x";
+        notation += toFile;
+        notation += toRank;
         return true;
+      }
     }
 
     // black pawn moves
     else if (piece === "p" && color === "b") {
+
+      // normal move
       if (
-        // normal move
         (toRankIndex === fromRankIndex + 1 &&
           toFileIndex === fromFileIndex &&
           boardState[toRankIndex][toFileIndex] === "  ") ||
         (fromRankIndex === 1 && toRankIndex === 3)
-      )
+      ) {
+        notation += toFile;
+        notation += toRank;
         return true;
+      }
+
+      // capture move
       else if (
-        // capture move
         ((toRankIndex - 1 === fromRankIndex &&
           toFileIndex + 1 === fromFileIndex) ||
           (toRankIndex - 1 === fromRankIndex &&
             toFileIndex - 1 === fromFileIndex)) &&
         boardState[toRankIndex][toFileIndex] !== "  " &&
         boardState[toRankIndex][toFileIndex].charAt(0) !== color
-      )
+      ) {
+        notation += fromFile;
+        notation += "x";
+        notation += toFile;
+        notation += toRank;
         return true;
+      }
     }
 
-    // white bishop (oont)
+    // white knight (ghoda)
     else if (piece === "b" && color === "w") {
     }
     return false;
