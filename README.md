@@ -25,11 +25,11 @@
 - ✅ **Notation**
 
 ### ♕ Queen Moves:
-- ❌ Moves **vertically**
-- ❌ Moves **horizontally**
-- ❌ Moves **diagonally**
-- ❌ Cannot jump over pieces
-- ❌ **Notation**
+- ✅ Moves **vertically**
+- ✅ Moves **horizontally**
+- ✅ Moves **diagonally**
+- ✅ Cannot jump over pieces
+- ✅ **Notation**
 
 ### ♔ King Moves:  
 - ❌ Moves **one square** in any direction
