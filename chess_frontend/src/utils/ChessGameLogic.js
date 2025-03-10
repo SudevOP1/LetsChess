@@ -233,6 +233,13 @@ function getAvailableKnightSquares(boardState, fromFileIndex, fromRankIndex, col
     return availableSquares;
 }
 
+function getAvailableQueenSquares(boardState, fromFileIndex, fromRankIndex, color) {
+    let diagonalSquares = getAvailableBishopSquares(boardState, fromFileIndex, fromRankIndex, color);
+    let straightMoves = getAvailableRookSquares(boardState, fromFileIndex, fromRankIndex, color);
+    let availableSquares = diagonalSquares.concat(straightMoves);
+    return availableSquares;
+}
+
 export function isValidMove(toRankIndex, toFileIndex, heldPiece, boardState, newBoardState) {
     let notation      = "";
     let isValid       = false;
@@ -382,6 +389,20 @@ export function isValidMove(toRankIndex, toFileIndex, heldPiece, boardState, new
     // white queen moves (wq)
     // black queen moves (bq)
     else if(piece === "q") {
+        let availableSquares = getAvailableQueenSquares(boardState, fromFileIndex, fromRankIndex, color);
+        for(let square of availableSquares) {
+            if(square.rankIndex === toRankIndex && square.fileIndex === toFileIndex) {
+                notation += "R";
+                // capture move
+                if(boardState[toRankIndex][toFileIndex] !== "  ") {
+                    notation += "x";
+                }
+                notation += toFile;
+                notation += toRank;
+                isValid = true;
+                break;
+            }
+        }
     }
 
     // white king moves (wk)
@@ -470,6 +491,7 @@ export function getAvailableSquares(heldPiece, boardState) {
     // white queen (wq)
     // black queen (bq)
     else if(piece === "q") {
+        return getAvailableQueenSquares(boardState, fromFileIndex, fromRankIndex, color);
     }
 
     // white king (wk)
