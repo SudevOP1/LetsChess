@@ -1,12 +1,12 @@
+// Please refer to ChessGame.jsx for nomenclature of pieces that I have used
+
 export function checkForChecks() {
     return false;
 };
 
-
 export function checkForCheckMate() {
     return false;
 };
-
 
 export function calcNotation (
     toRankIndex, toFileIndex, heldPiece, boardState, newBoardState,
@@ -208,15 +208,40 @@ function getAvailableBishopSquares(boardState, fromFileIndex, fromRankIndex, col
     return availableSquares;
 }
 
+function getAvailableKnightSquares(boardState, fromFileIndex, fromRankIndex, color) {
+    let availableSquares = [];
+    let directions = [
+        [ 1,  2],
+        [ 1, -2],
+        [-1,  2],
+        [-1, -2],
+        [ 2,  1],
+        [ 2, -1],
+        [-2,  1],
+        [-2, -1],
+    ]
+    for(let direction of directions) {
+        let toRankIndex = fromRankIndex + direction[0];
+        let toFileIndex = fromFileIndex + direction[1];
+        if(
+            (toRankIndex >= 0 && toRankIndex < 8 && toFileIndex >= 0 && toFileIndex < 8) &&
+            (boardState[toRankIndex][toFileIndex].charAt(0) != color)
+        ) {
+            availableSquares.push({ rankIndex: toRankIndex, fileIndex: toFileIndex });
+        }
+    }
+    return availableSquares;
+}
+
 export function isValidMove(toRankIndex, toFileIndex, heldPiece, boardState, newBoardState) {
-    let notation = "";
-    let isValid = false;
-    let piece = heldPiece.piece.charAt(1);
-    let color = heldPiece.piece.charAt(0);
-    let fromFile = String.fromCharCode(97 + heldPiece.heldFromFileIndex); // Convert 0-7 to "a-h"
-    let fromRank = (8 - parseInt(heldPiece.heldFromRankIndex)).toString();
-    let toFile = String.fromCharCode(97 + toFileIndex); // Convert 0-7 to "a-h"
-    let toRank = (8 - toRankIndex).toString();
+    let notation      = "";
+    let isValid       = false;
+    let piece         = heldPiece.piece.charAt(1);
+    let color         = heldPiece.piece.charAt(0);
+    let fromFile      = String.fromCharCode(97 + heldPiece.heldFromFileIndex); // Convert 0-7 to "a-h"
+    let fromRank      = (8 - parseInt(heldPiece.heldFromRankIndex)).toString();
+    let toFile        = String.fromCharCode(97 + toFileIndex); // Convert 0-7 to "a-h"
+    let toRank        = (8 - toRankIndex).toString();
     let fromFileIndex = heldPiece.heldFromFileIndex;
     let fromRankIndex = heldPiece.heldFromRankIndex;
 
@@ -300,27 +325,19 @@ export function isValidMove(toRankIndex, toFileIndex, heldPiece, boardState, new
     // white knight moves (wn) (ghoda)
     // black knight moves (bn) (ghoda)
     else if (piece === "n") {
-        if(
-            boardState[toRankIndex][toFileIndex].charAt(0) !== color
-            && (
-                (toFileIndex === fromFileIndex + 2 && toRankIndex === fromRankIndex - 1) ||
-                (toFileIndex === fromFileIndex + 2 && toRankIndex === fromRankIndex + 1) ||
-                (toFileIndex === fromFileIndex - 2 && toRankIndex === fromRankIndex - 1) ||
-                (toFileIndex === fromFileIndex - 2 && toRankIndex === fromRankIndex + 1) ||
-                (toFileIndex === fromFileIndex + 1 && toRankIndex === fromRankIndex - 2) ||
-                (toFileIndex === fromFileIndex + 1 && toRankIndex === fromRankIndex + 2) ||
-                (toFileIndex === fromFileIndex - 1 && toRankIndex === fromRankIndex - 2) ||
-                (toFileIndex === fromFileIndex - 1 && toRankIndex === fromRankIndex + 2)
-            )
-        ) {
-            notation += "N";
-            // capture move
-            if(boardState[toRankIndex][toFileIndex] !== "  ") {
-                notation += "x";
+        let availableSquares = getAvailableKnightSquares(boardState, fromFileIndex, fromRankIndex, color);
+        for(let square of availableSquares) {
+            if(square.rankIndex === toRankIndex && square.fileIndex === toFileIndex) {
+                notation += "B";
+                // capture move
+                if(boardState[toRankIndex][toFileIndex] !== "  ") {
+                    notation += "x";
+                }
+                notation += toFile;
+                notation += toRank;
+                isValid = true;
+                break;
             }
-            notation += toFile;
-            notation += toRank;
-            isValid = true;
         }
     }
 
@@ -382,17 +399,60 @@ export function getAvailableSquares(heldPiece, boardState) {
     let fromFileIndex = heldPiece.heldFromFileIndex;
     let fromRankIndex = heldPiece.heldFromRankIndex;
 
-    // white pawn (wp)
+    // white pawn moves (wp)
     if (piece === "p" && color === "w") {
+        let availableSquares = [];
+        // single space move
+        if(boardState[fromRankIndex-1][fromFileIndex] === "  ") {
+            availableSquares.push({ rankIndex: fromRankIndex-1, fileIndex: fromFileIndex });
+    
+            // double space move
+            if(fromRankIndex === 6 && boardState[fromRankIndex-2][fromFileIndex] === "  ") {
+                availableSquares.push({ rankIndex: fromRankIndex-2, fileIndex: fromFileIndex });
+            }
+        }
+        // left capture move
+        if(fromFileIndex > 0 && boardState[fromRankIndex-1][fromFileIndex-1] !== "  " &&
+            boardState[fromRankIndex-1][fromFileIndex-1].charAt(0) !== "w") {
+            availableSquares.push({ rankIndex: fromRankIndex-1, fileIndex: fromFileIndex-1 });
+        }
+        // right capture move
+        if(fromFileIndex < 7 && boardState[fromRankIndex-1][fromFileIndex+1] !== "  " &&
+            boardState[fromRankIndex-1][fromFileIndex+1].charAt(0) !== "w") {
+            availableSquares.push({ rankIndex: fromRankIndex-1, fileIndex: fromFileIndex+1 });
+        }
+        return availableSquares;
     }
 
-    // black pawn (bp)
+    // black pawn moves (bp)
     else if (piece === "p" && color === "b") {
+        let availableSquares = [];
+        // single space move
+        if(boardState[fromRankIndex+1][fromFileIndex] === "  ") {
+            availableSquares.push({ rankIndex: fromRankIndex+1, fileIndex: fromFileIndex });
+    
+            // double space move
+            if(fromRankIndex === 1 && boardState[fromRankIndex+2][fromFileIndex] === "  ") {
+                availableSquares.push({ rankIndex: fromRankIndex+2, fileIndex: fromFileIndex });
+            }
+        }
+        // left capture move
+        if(fromFileIndex > 0 && boardState[fromRankIndex+1][fromFileIndex-1] !== "  " &&
+            boardState[fromRankIndex+1][fromFileIndex-1].charAt(0) !== "b") {
+            availableSquares.push({ rankIndex: fromRankIndex+1, fileIndex: fromFileIndex-1 });
+        }
+        // right capture move
+        if(fromFileIndex < 7 && boardState[fromRankIndex+1][fromFileIndex+1] !== "  " &&
+            boardState[fromRankIndex+1][fromFileIndex+1].charAt(0) !== "b") {
+            availableSquares.push({ rankIndex: fromRankIndex+1, fileIndex: fromFileIndex+1 });
+        }
+        return availableSquares;
     }
 
     // white knight (wn) (ghoda)
     // black knight (bn) (ghoda)
     else if (piece === "n") {
+        return getAvailableKnightSquares(boardState, fromFileIndex, fromRankIndex, color);
     }
 
     // white bishop (wb) (oont)
@@ -404,6 +464,7 @@ export function getAvailableSquares(heldPiece, boardState) {
     // white rook (wr)
     // black rook (br)
     else if(piece === "r") {
+        return getAvailableRookSquares(boardState, fromFileIndex, fromRankIndex, color);
     }
 
     // white queen (wq)
