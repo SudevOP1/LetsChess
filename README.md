@@ -37,6 +37,7 @@
 - ✅ Notation
 - ❌ A king must move out of check (or block/capture the attacking piece).
 - ❌ King is able to move to a checked square behind itself.
+- ❌ King is able to move to a opponent king.
 
 ### Castling Move:
 - ❌ The king moves two squares towards a rook
