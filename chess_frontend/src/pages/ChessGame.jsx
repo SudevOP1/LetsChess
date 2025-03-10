@@ -12,7 +12,7 @@ import bbImage from "../assets/bb.png";
 import brImage from "../assets/br.png";
 import bqImage from "../assets/bq.png";
 import bkImage from "../assets/bk.png";
-import { calcNotation, isValidMove, checkForChecks, checkForCheckMate } from "../utils/ChessGameLogic.js";
+import { calcNotation, isValidMove, getAvailableSquares, checkForChecks, checkForCheckMate } from "../utils/ChessGameLogic.js";
 import { useState } from "react";
 
 const ChessGame = () => {
@@ -125,13 +125,27 @@ const ChessGame = () => {
   let [heldPiece, setHeldPiece] = useState(null);
   // let [moves, setMoves] = useState(sampleMoves["moves"]); // for debugging
   let [moves, setMoves] = useState([]);
+  let [highlightedCells, setHighlightedCells] = useState(Array(8).fill(null).map(() => Array(8).fill(false)));
+
+
   let holdThisPiece = (rankIndex, fileIndex, piece) => {
     if (piece != "  ") {
-      setHeldPiece({
+      let newHeldPiece = {
         piece: piece,
         heldFromRankIndex: rankIndex,
         heldFromFileIndex: fileIndex,
-      });
+      }
+      setHeldPiece(newHeldPiece);
+      
+      // highlight the available squares of this piece
+      let availableSquares = getAvailableSquares(newHeldPiece, boardState);
+      if(availableSquares.length > 0) {
+        let newHighlightedCells = Array(8).fill(null).map(() => Array(8).fill(false)); // reset highlighted cells
+        for(let square of availableSquares) {
+          newHighlightedCells[square.rankIndex][square.fileIndex] = true;
+        }
+        setHighlightedCells(newHighlightedCells);
+      }
     }
   };
   let allowDrop = (e) => {
@@ -141,6 +155,8 @@ const ChessGame = () => {
     if (heldPiece) {
       // copy existing board state
       let newBoardState = boardState.map((rank) => [...rank]); // deep copy
+      // reset highlighted cells
+      setHighlightedCells(Array(8).fill(null).map(() => Array(8).fill(false)));
 
       // if valid move, move the piece and clear previous cell
       if (
@@ -204,7 +220,10 @@ const ChessGame = () => {
                     key={fileIndex}
                     className={`w-[75px] h-[75px] ${
                       isDarkCell ? "bg-[#88a6ba]" : "bg-[#d1dee3]"
-                    }`}
+                    }
+                    ${highlightedCells[rankIndex][fileIndex] && (
+                      isDarkCell ? "bg-[#d66e65]" : "bg-[#e87b6f]"
+                    )}`}
                     onDragOver={allowDrop}
                     onDrop={() => dropThisPiece(rankIndex, fileIndex)}
                   >

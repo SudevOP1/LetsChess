@@ -137,7 +137,78 @@ function getAvailableRookSquares(boardState, fromFileIndex, fromRankIndex, color
     return availableSquares;
 }
 
-export function isValidMove (toRankIndex, toFileIndex, heldPiece, boardState, newBoardState) {
+function getAvailableBishopSquares(boardState, fromFileIndex, fromRankIndex, color) {
+    let availableSquares = [];
+    let i, j;
+    // find available squares to the topleft
+    i=fromRankIndex-1, j=fromFileIndex-1;
+    while(i >= 0 && j >= 0) {
+        if(boardState[i][j] === "  ") {
+            availableSquares.push({ rankIndex: i, fileIndex: j})
+        }
+        else if(boardState[i][j].charAt(0) !== color) {
+            availableSquares.push({ rankIndex: i, fileIndex: j})
+            break;
+        }
+        else {
+            break;
+        }
+        i--;
+        j--;
+    }
+    // find available squares to the topright
+    i=fromRankIndex+1, j=fromFileIndex-1;
+    while(i <= 7 && j >= 0) {
+        if(boardState[i][j] === "  ") {
+            availableSquares.push({ rankIndex: i, fileIndex: j})
+        }
+        else if(boardState[i][j].charAt(0) !== color) {
+            availableSquares.push({ rankIndex: i, fileIndex: j})
+            break;
+        }
+        else {
+            break;
+        }
+        i++;
+        j--;
+    }
+    // find available squares to the bottomleft
+    i=fromRankIndex-1, j=fromFileIndex+1;
+    while(i >= 0 && j <= 7) {
+        if(boardState[i][j] === "  ") {
+            availableSquares.push({ rankIndex: i, fileIndex: j})
+        }
+        else if(boardState[i][j].charAt(0) !== color) {
+            availableSquares.push({ rankIndex: i, fileIndex: j})
+            break;
+        }
+        else {
+            break;
+        }
+        i--;
+        j++;
+    }
+    // find available squares to the bottomright
+    i=fromRankIndex+1, j=fromFileIndex+1;
+    while(i <= 7 && j <= 7) {
+        if(boardState[i][j] === "  ") {
+            availableSquares.push({ rankIndex: i, fileIndex: j})
+        }
+        else if(boardState[i][j].charAt(0) !== color) {
+            availableSquares.push({ rankIndex: i, fileIndex: j})
+            break;
+        }
+        else {
+            break;
+        }
+        i++;
+        j++;
+    }
+    // console.log(availableSquares);
+    return availableSquares;
+}
+
+export function isValidMove(toRankIndex, toFileIndex, heldPiece, boardState, newBoardState) {
     let notation = "";
     let isValid = false;
     let piece = heldPiece.piece.charAt(1);
@@ -256,6 +327,20 @@ export function isValidMove (toRankIndex, toFileIndex, heldPiece, boardState, ne
     // white bishop moves (wb) (oont)
     // black bishop moves (bb) (oont)
     else if(piece === "b") {
+        let availableSquares = getAvailableBishopSquares(boardState, fromFileIndex, fromRankIndex, color);
+        for(let square of availableSquares) {
+            if(square.rankIndex === toRankIndex && square.fileIndex === toFileIndex) {
+                notation += "B";
+                // capture move
+                if(boardState[toRankIndex][toFileIndex] !== "  ") {
+                    notation += "x";
+                }
+                notation += toFile;
+                notation += toRank;
+                isValid = true;
+                break;
+            }
+        }
     }
 
     // white rook moves (wr)
@@ -290,3 +375,46 @@ export function isValidMove (toRankIndex, toFileIndex, heldPiece, boardState, ne
     notation === "" ? null : console.log(notation);
     return isValid;
 };
+
+export function getAvailableSquares(heldPiece, boardState) {
+    let piece = heldPiece.piece.charAt(1);
+    let color = heldPiece.piece.charAt(0);
+    let fromFileIndex = heldPiece.heldFromFileIndex;
+    let fromRankIndex = heldPiece.heldFromRankIndex;
+
+    // white pawn (wp)
+    if (piece === "p" && color === "w") {
+    }
+
+    // black pawn (bp)
+    else if (piece === "p" && color === "b") {
+    }
+
+    // white knight (wn) (ghoda)
+    // black knight (bn) (ghoda)
+    else if (piece === "n") {
+    }
+
+    // white bishop (wb) (oont)
+    // black bishop (bb) (oont)
+    else if(piece === "b") {
+        return getAvailableBishopSquares(boardState, fromFileIndex, fromRankIndex, color);
+    }
+
+    // white rook (wr)
+    // black rook (br)
+    else if(piece === "r") {
+    }
+
+    // white queen (wq)
+    // black queen (bq)
+    else if(piece === "q") {
+    }
+
+    // white king (wk)
+    // black king (bk)
+    else if(piece === "k") {
+    }
+
+    return Error("Invalid piece");
+}

@@ -20,9 +20,9 @@
 - [x] **Notation**
 
 ### ♗ Bishop Moves:
-- [ ] Moves **diagonally**
-- [ ] Cannot jump over pieces
-- [ ] **Notation**
+- [x] Moves **diagonally**
+- [x] Cannot jump over pieces
+- [x] **Notation**
 
 ### ♕ Queen Moves:
 - [ ] Moves **vertically**
