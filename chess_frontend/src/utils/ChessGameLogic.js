@@ -240,6 +240,113 @@ function getAvailableQueenSquares(boardState, fromFileIndex, fromRankIndex, colo
     return availableSquares;
 }
 
+function getCheckSquares(heldPiece, boardState, oppColor) {
+    let piece         = heldPiece.piece.charAt(1);
+    let pieceColor    = heldPiece.piece.charAt(0);
+    let fromFileIndex = heldPiece.heldFromFileIndex;
+    let fromRankIndex = heldPiece.heldFromRankIndex;
+    let checkSquares  = [];
+
+    // pawn check squares
+    if(piece === "p") {
+        if(pieceColor === "w") {
+            if(fromRankIndex > 0) {
+                if(fromFileIndex > 0) checkSquares.push({ rankIndex: fromRankIndex-1, fileIndex: fromFileIndex-1 });
+                if(fromFileIndex < 7) checkSquares.push({ rankIndex: fromRankIndex-1, fileIndex: fromFileIndex+1 });
+            }
+        } 
+        else if(pieceColor === "b") {
+            if(fromRankIndex < 7) {
+                if(fromFileIndex > 0) checkSquares.push({ rankIndex: fromRankIndex+1, fileIndex: fromFileIndex-1 });
+                if(fromFileIndex < 7) checkSquares.push({ rankIndex: fromRankIndex+1, fileIndex: fromFileIndex+1 });
+            }
+        }
+    }
+
+    // Knight check squares
+    else if (piece === "n") {
+        checkSquares = checkSquares.concat(getAvailableKnightSquares(boardState, fromFileIndex, fromRankIndex, pieceColor));
+    }
+
+    // Bishop check squares
+    else if(piece === "b") {
+        checkSquares = checkSquares.concat(getAvailableBishopSquares(boardState, fromFileIndex, fromRankIndex, pieceColor));
+    }
+
+    // Rook check squares
+    else if(piece === "r") {
+        checkSquares = checkSquares.concat(getAvailableRookSquares(boardState, fromFileIndex, fromRankIndex, pieceColor));
+    }
+
+    // Queen check squares
+    else if(piece === "q") {
+        checkSquares = checkSquares.concat(getAvailableQueenSquares(boardState, fromFileIndex, fromRankIndex, pieceColor));
+    }
+    
+    return checkSquares;
+}
+
+function getAvailableKingSquares(boardState, fromFileIndex, fromRankIndex, kingColor) {
+    // Get basic king movement squares
+    let kingSquares = [];
+    let directions = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [ 0, -1],          [ 0, 1],
+        [ 1, -1], [ 1, 0], [ 1, 1]
+    ];
+    
+    for(let direction of directions) {
+        let toRankIndex = fromRankIndex + direction[0];
+        let toFileIndex = fromFileIndex + direction[1];
+
+        // Check if square is on board and not occupied by friendly piece
+        if(
+            toRankIndex >= 0 && toRankIndex < 8 &&
+            toFileIndex >= 0 && toFileIndex < 8 &&
+            (boardState[toRankIndex][toFileIndex] === "  " || 
+             boardState[toRankIndex][toFileIndex].charAt(0) !== kingColor)
+        ) {
+            kingSquares.push({ rankIndex: toRankIndex, fileIndex: toFileIndex });
+        }
+    }
+
+    // Find all opponent pieces and their attack squares
+    let oppPiecesCheckSquares = [];
+    for(let i=0; i<8; i++) {
+        for(let j=0; j<8; j++) {
+            // Find opponent piece that's not a king
+            if(
+                boardState[i][j] !== "  " &&
+                boardState[i][j].charAt(0) !== kingColor &&
+                boardState[i][j].charAt(1) !== "k"
+            ) {
+                let piece = boardState[i][j];
+                let heldPiece = {
+                    piece: piece,
+                    heldFromRankIndex: i,
+                    heldFromFileIndex: j
+                };
+                
+                // Get squares this piece can attack
+                let attackSquares = getCheckSquares(heldPiece, boardState, kingColor);
+                for(let square of attackSquares) {
+                    oppPiecesCheckSquares.push(square);
+                }
+            }
+        }
+    }
+
+    // Remove squares that are under attack
+    kingSquares = kingSquares.filter(kingSquare =>
+        !oppPiecesCheckSquares.some(oppCheckSquare =>
+            oppCheckSquare.rankIndex === kingSquare.rankIndex &&
+            oppCheckSquare.fileIndex === kingSquare.fileIndex
+        )
+    );
+
+    return kingSquares;
+}
+
 export function isValidMove(toRankIndex, toFileIndex, heldPiece, boardState, newBoardState) {
     let notation      = "";
     let isValid       = false;
@@ -335,7 +442,7 @@ export function isValidMove(toRankIndex, toFileIndex, heldPiece, boardState, new
         let availableSquares = getAvailableKnightSquares(boardState, fromFileIndex, fromRankIndex, color);
         for(let square of availableSquares) {
             if(square.rankIndex === toRankIndex && square.fileIndex === toFileIndex) {
-                notation += "B";
+                notation += "N";
                 // capture move
                 if(boardState[toRankIndex][toFileIndex] !== "  ") {
                     notation += "x";
@@ -392,7 +499,7 @@ export function isValidMove(toRankIndex, toFileIndex, heldPiece, boardState, new
         let availableSquares = getAvailableQueenSquares(boardState, fromFileIndex, fromRankIndex, color);
         for(let square of availableSquares) {
             if(square.rankIndex === toRankIndex && square.fileIndex === toFileIndex) {
-                notation += "R";
+                notation += "Q";
                 // capture move
                 if(boardState[toRankIndex][toFileIndex] !== "  ") {
                     notation += "x";
@@ -408,6 +515,20 @@ export function isValidMove(toRankIndex, toFileIndex, heldPiece, boardState, new
     // white king moves (wk)
     // black king moves (bk)
     else if(piece === "k") {
+        let availableSquares = getAvailableKingSquares(boardState, fromFileIndex, fromRankIndex, color);
+        for(let square of availableSquares) {
+            if(square.rankIndex === toRankIndex && square.fileIndex === toFileIndex) {
+                notation += "K";
+                // capture move
+                if(boardState[toRankIndex][toFileIndex] !== "  ") {
+                    notation += "x";
+                }
+                notation += toFile;
+                notation += toRank;
+                isValid = true;
+                break;
+            }
+        }
     }
 
     notation === "" ? null : console.log(notation);
@@ -496,8 +617,9 @@ export function getAvailableSquares(heldPiece, boardState) {
 
     // white king (wk)
     // black king (bk)
-    else if(piece === "k") {
+    if(piece === "k") {
+        return getAvailableKingSquares(boardState, fromFileIndex, fromRankIndex, color);
     }
 
-    return Error("Invalid piece");
+    throw new Error(`Invalid piece: color=${color} piece=${piece}`);
 }
